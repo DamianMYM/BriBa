@@ -29,8 +29,8 @@ This project does not provide, host, sell, or distribute any videos, subtitles, 
 ## Install
 
 ```powershell
-git clone https://github.com/DamianMYM/subtitle-fusion-workbench.git
-cd subtitle-fusion-workbench
+git clone https://github.com/DamianMYM/BriBa.git
+cd BriBa
 
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
