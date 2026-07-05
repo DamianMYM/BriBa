@@ -10,10 +10,12 @@ import re
 import shutil
 import subprocess
 import sys
+import urllib.parse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import requests
 from PIL import Image, ImageOps
 
 
@@ -64,7 +66,19 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Probe a video and extract subtitles when available."
     )
-    parser.add_argument("video", help="Path to a local video file")
+    parser.add_argument("video", nargs="?", help="Path to a local video file")
+    parser.add_argument(
+        "--download-url",
+        help="Download a video URL with yt-dlp before processing.",
+    )
+    parser.add_argument(
+        "--start",
+        help="Optional clip start time, for example 00:01:12.500 or 72.5",
+    )
+    parser.add_argument(
+        "--end",
+        help="Optional clip end time, for example 00:02:03 or 123",
+    )
     parser.add_argument(
         "--output-dir",
         default="output",
@@ -114,11 +128,28 @@ def parse_args() -> argparse.Namespace:
         default=0.28,
         help="Bottom portion of the frame to crop for OCR, expressed as 0-1 ratio of frame height",
     )
+    parser.add_argument(
+        "--ollama-model",
+        default="qwen3.5:27b",
+        help="Local Ollama model used for English learning notes.",
+    )
+    parser.add_argument(
+        "--skip-ollama",
+        action="store_true",
+        help="Skip grammar and learning-note generation.",
+    )
     return parser.parse_args()
 
 
 def require_binary(name: str) -> str:
     binary = shutil.which(name)
+    if not binary and name == "ffmpeg":
+        try:
+            import imageio_ffmpeg
+
+            binary = imageio_ffmpeg.get_ffmpeg_exe()
+        except Exception:
+            binary = None
     if not binary:
         raise PipelineError(
             f"Missing required binary: {name}. Install it first, then rerun."
@@ -127,7 +158,31 @@ def require_binary(name: str) -> str:
 
 
 def optional_binary(name: str) -> str | None:
-    return shutil.which(name)
+    binary = shutil.which(name)
+    if not binary and name == "ffmpeg":
+        try:
+            import imageio_ffmpeg
+
+            return imageio_ffmpeg.get_ffmpeg_exe()
+        except Exception:
+            return None
+    return binary
+
+
+def ensure_ffmpeg_on_path() -> None:
+    if shutil.which("ffmpeg"):
+        return
+    ffmpeg = require_binary("ffmpeg")
+    if Path(ffmpeg).name.lower() == "ffmpeg.exe":
+        os.environ["PATH"] = str(Path(ffmpeg).parent) + os.pathsep + os.environ.get("PATH", "")
+        return
+
+    tools_dir = Path(__file__).resolve().parent / ".tools"
+    tools_dir.mkdir(parents=True, exist_ok=True)
+    shim_path = tools_dir / "ffmpeg.exe"
+    if not shim_path.exists():
+        shutil.copy2(ffmpeg, shim_path)
+    os.environ["PATH"] = str(tools_dir) + os.pathsep + os.environ.get("PATH", "")
 
 
 def run_command(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -242,6 +297,110 @@ def output_path_for(video_path: Path, output_dir: Path, suffix: str) -> Path:
     return output_dir / f"{video_path.stem}{suffix}"
 
 
+def parse_timecode(value: str | None) -> float | None:
+    if value is None or str(value).strip() == "":
+        return None
+    text = str(value).strip().lower().replace(",", ".")
+    text = (
+        text.replace("小时", "h")
+        .replace("时", "h")
+        .replace("分钟", "m")
+        .replace("分", "m")
+        .replace("秒", "s")
+    )
+    chinese_like = re.fullmatch(
+        r"(?:(?P<hours>\d+(?:\.\d+)?)h)?\s*(?:(?P<minutes>\d+(?:\.\d+)?)m)?\s*(?:(?P<seconds>\d+(?:\.\d+)?)s?)?",
+        text,
+    )
+    if chinese_like and any(chinese_like.group(name) for name in ("hours", "minutes", "seconds")):
+        hours = float(chinese_like.group("hours") or 0)
+        minutes = float(chinese_like.group("minutes") or 0)
+        seconds = float(chinese_like.group("seconds") or 0)
+        return hours * 3600 + minutes * 60 + seconds
+    if re.fullmatch(r"\d+(\.\d+)?", text):
+        return float(text)
+    parts = text.split(":")
+    if len(parts) not in {2, 3}:
+        raise PipelineError(f"Invalid time value: {value}")
+    try:
+        numbers = [float(part) for part in parts]
+    except ValueError as exc:
+        raise PipelineError(f"Invalid time value: {value}") from exc
+    if len(numbers) == 2:
+        minutes, seconds = numbers
+        return minutes * 60 + seconds
+    hours, minutes, seconds = numbers
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def seconds_to_ffmpeg_time(seconds: float) -> str:
+    return f"{max(0.0, seconds):.3f}"
+
+
+def clip_video(
+    video_path: Path,
+    output_dir: Path,
+    start: float | None,
+    end: float | None,
+) -> Path:
+    if start is None and end is None:
+        return video_path
+    if start is not None and end is not None and end <= start:
+        raise PipelineError("Clip end time must be later than start time.")
+
+    ffmpeg = require_binary("ffmpeg")
+    clip_path = output_path_for(video_path, output_dir, ".clip.mp4")
+    command = [ffmpeg, "-y"]
+    if start is not None:
+        command.extend(["-ss", seconds_to_ffmpeg_time(start)])
+    command.extend(["-i", str(video_path)])
+    if end is not None:
+        command.extend(["-t", seconds_to_ffmpeg_time(end - (start or 0.0))])
+    command.extend(["-c", "copy", str(clip_path)])
+    try:
+        run_command(command)
+    except PipelineError:
+        command = [ffmpeg, "-y"]
+        if start is not None:
+            command.extend(["-ss", seconds_to_ffmpeg_time(start)])
+        command.extend(["-i", str(video_path)])
+        if end is not None:
+            command.extend(["-t", seconds_to_ffmpeg_time(end - (start or 0.0))])
+        command.extend(["-c:v", "libx264", "-c:a", "aac", str(clip_path)])
+        run_command(command)
+    return clip_path
+
+
+def download_video(url: str, output_dir: Path) -> Path:
+    try:
+        from yt_dlp import YoutubeDL
+    except ImportError as exc:
+        raise PipelineError("Missing dependency: yt-dlp. Install it with `pip install yt-dlp`.") from exc
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    parsed = urllib.parse.urlparse(url)
+    safe_host = re.sub(r"[^A-Za-z0-9_.-]+", "_", parsed.netloc or "download")
+    template = str(output_dir / f"{safe_host}.%(title).80s.%(ext)s")
+    options = {
+        "outtmpl": template,
+        "format": "bv*+ba/b",
+        "merge_output_format": "mp4",
+        "noplaylist": True,
+        "quiet": True,
+        "no_warnings": True,
+    }
+    with YoutubeDL(options) as ydl:
+        info = ydl.extract_info(url, download=True)
+        downloaded = Path(ydl.prepare_filename(info))
+
+    if downloaded.exists():
+        return downloaded
+    mp4_path = downloaded.with_suffix(".mp4")
+    if mp4_path.exists():
+        return mp4_path
+    raise PipelineError("yt-dlp finished but the downloaded file was not found.")
+
+
 def extract_embedded_subtitles(
     video_path: Path,
     output_dir: Path,
@@ -312,6 +471,26 @@ def extract_audio(video_path: Path, output_dir: Path) -> Path:
             "1",
             "-ar",
             "16000",
+            str(audio_path),
+        ]
+    )
+    return audio_path
+
+
+def extract_listening_audio(video_path: Path, output_dir: Path) -> Path:
+    ffmpeg = require_binary("ffmpeg")
+    audio_path = output_path_for(video_path, output_dir, ".listening.mp3")
+    run_command(
+        [
+            ffmpeg,
+            "-y",
+            "-i",
+            str(video_path),
+            "-vn",
+            "-codec:a",
+            "libmp3lame",
+            "-q:a",
+            "3",
             str(audio_path),
         ]
     )
@@ -546,8 +725,86 @@ def write_segment_outputs(
     return [srt_path, txt_path, json_path]
 
 
+def read_transcript_text(segments: list[dict[str, Any]], max_chars: int = 8000) -> str:
+    text = " ".join(str(segment.get("text", "")).strip() for segment in segments)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:max_chars]
+
+
+def ollama_learning_notes(
+    transcript: str,
+    output_dir: Path,
+    stem: str,
+    model: str,
+    language: str,
+) -> list[Path]:
+    if not transcript:
+        return []
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    prompt = f"""
+You are an English learning coach for Chinese-speaking learners.
+Analyze the transcript below and return concise, practical study notes.
+
+Output in Markdown with these sections:
+1. Clean Transcript
+2. Vocabulary and Phrases
+3. Grammar Highlights
+4. Listening Focus
+5. Shadowing Practice
+6. Teaching Tips
+
+Language code: {language}
+Transcript:
+{transcript}
+""".strip()
+    try:
+        response = requests.post(
+            "http://127.0.0.1:11434/api/generate",
+            json={"model": model, "prompt": prompt, "stream": False},
+            timeout=180,
+        )
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        raise PipelineError(
+            f"Ollama request failed. Make sure `ollama serve` is running and model `{model}` exists."
+        ) from exc
+
+    notes = str(response.json().get("response", "")).strip()
+    if not notes:
+        raise PipelineError("Ollama returned an empty learning note.")
+
+    md_path = output_dir / f"{stem}.learning.md"
+    json_path = output_dir / f"{stem}.learning.json"
+    write_text(md_path, notes + "\n")
+    json_path.write_text(
+        json.dumps(
+            {
+                "model": model,
+                "language": language,
+                "transcript": transcript,
+                "notes": notes,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return [md_path, json_path]
+
+
 def load_asr_backend() -> tuple[str, Any]:
     os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+    hf_endpoint = os.environ.get("HF_ENDPOINT")
+    if hf_endpoint:
+        os.environ["HF_ENDPOINT"] = hf_endpoint.strip()
+
+    try:
+        import whisper
+
+        return "openai-whisper", whisper
+    except ImportError:
+        pass
 
     try:
         from faster_whisper import WhisperModel
@@ -556,14 +813,9 @@ def load_asr_backend() -> tuple[str, Any]:
     except ImportError:
         pass
 
-    try:
-        import whisper
-
-        return "openai-whisper", whisper
-    except ImportError as exc:
-        raise PipelineError(
-            "No ASR backend found. Install `faster-whisper` or `openai-whisper` in your active Python environment."
-        ) from exc
+    raise PipelineError(
+        "No ASR backend found. Install `openai-whisper` or `faster-whisper` in your active Python environment."
+    )
 
 
 def transcribe_audio(
@@ -572,27 +824,95 @@ def transcribe_audio(
     language: str,
 ) -> tuple[str, list[dict[str, Any]]]:
     backend_name, backend = load_asr_backend()
+    common_options = {
+        "language": language,
+        "temperature": 0.0,
+        "condition_on_previous_text": False,
+        "compression_ratio_threshold": 2.4,
+        "no_speech_threshold": 0.6,
+    }
 
     if backend_name == "faster-whisper":
-        model = backend(model_name)
-        segments_iter, _info = model.transcribe(str(audio_path), language=language)
-        segments = [
-            {"start": segment.start, "end": segment.end, "text": segment.text}
-            for segment in segments_iter
-        ]
-        return backend_name, segments
+        try:
+            model = backend(model_name)
+            segments_iter, _info = model.transcribe(
+                str(audio_path),
+                **common_options,
+                log_prob_threshold=-1.0,
+            )
+        except Exception as exc:
+            raise PipelineError(f"faster-whisper failed: {exc}") from exc
+        segments = []
+        for segment in segments_iter:
+            segments.append(
+                {
+                    "start": segment.start,
+                    "end": segment.end,
+                    "text": segment.text,
+                    "avg_logprob": getattr(segment, "avg_logprob", None),
+                    "no_speech_prob": getattr(segment, "no_speech_prob", None),
+                    "compression_ratio": getattr(segment, "compression_ratio", None),
+                }
+            )
+        return backend_name, filter_asr_segments(segments)
 
-    model = backend.load_model(model_name)
-    result = model.transcribe(str(audio_path), language=language)
+    try:
+        ensure_ffmpeg_on_path()
+        model = backend.load_model(model_name)
+        result = model.transcribe(
+            str(audio_path),
+            **common_options,
+            logprob_threshold=-1.0,
+            verbose=False,
+        )
+    except Exception as exc:
+        raise PipelineError(f"openai-whisper failed: {exc}") from exc
     segments = [
         {
             "start": segment["start"],
             "end": segment["end"],
             "text": segment["text"],
+            "avg_logprob": segment.get("avg_logprob"),
+            "no_speech_prob": segment.get("no_speech_prob"),
+            "compression_ratio": segment.get("compression_ratio"),
         }
         for segment in result["segments"]
     ]
-    return backend_name, segments
+    return backend_name, filter_asr_segments(segments)
+
+
+def filter_asr_segments(segments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    filtered: list[dict[str, Any]] = []
+    for segment in segments:
+        text = re.sub(r"\s+", " ", str(segment.get("text", ""))).strip()
+        if not text:
+            continue
+
+        avg_logprob = segment.get("avg_logprob")
+        no_speech_prob = segment.get("no_speech_prob")
+        compression_ratio = segment.get("compression_ratio")
+        word_count = len(text.split())
+        duration = max(0.0, float(segment.get("end", 0.0)) - float(segment.get("start", 0.0)))
+
+        likely_silence = (
+            no_speech_prob is not None
+            and avg_logprob is not None
+            and float(no_speech_prob) >= 0.6
+            and float(avg_logprob) <= -0.7
+            and word_count <= 4
+        )
+        likely_long_silence_hallucination = (
+            no_speech_prob is not None
+            and float(no_speech_prob) >= 0.8
+            and duration >= 8.0
+            and word_count <= 6
+        )
+        likely_repetition = compression_ratio is not None and float(compression_ratio) >= 2.4
+        if likely_silence or likely_long_silence_hallucination or likely_repetition:
+            continue
+
+        filtered.append({**segment, "text": text})
+    return filtered
 
 
 def transcribe_asr(
@@ -618,6 +938,58 @@ def transcribe_asr(
         )
     )
     return paths, segments
+
+
+def process_learning_clip(
+    video_path: Path,
+    output_dir: Path,
+    model_name: str = "base",
+    language: str = "en",
+    start: str | None = None,
+    end: str | None = None,
+    ollama_model: str = "qwen3.5:27b",
+    skip_ollama: bool = False,
+) -> ProcessResult:
+    if not video_path.exists():
+        raise PipelineError(f"Video file does not exist: {video_path}")
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    start_seconds = parse_timecode(start)
+    end_seconds = parse_timecode(end)
+    clip_path = clip_video(video_path, output_dir, start_seconds, end_seconds)
+
+    created_files: list[Path] = []
+    if clip_path != video_path:
+        created_files.append(clip_path)
+
+    listening_audio = extract_listening_audio(clip_path, output_dir)
+    created_files.append(listening_audio)
+
+    asr_files, segments = transcribe_asr(clip_path, output_dir, model_name, language)
+    created_files.extend(asr_files)
+
+    transcript = read_transcript_text(segments)
+    if not skip_ollama:
+        created_files.extend(
+            ollama_learning_notes(
+                transcript=transcript,
+                output_dir=output_dir,
+                stem=clip_path.stem,
+                model=ollama_model,
+                language=language,
+            )
+        )
+
+    clip_label = "full video" if clip_path == video_path else f"clip {start or '0'} to {end or 'end'}"
+    return ProcessResult(
+        strategy_used="learning",
+        summary=(
+            f"Prepared {clip_label}. Generated listening audio, ASR subtitles, "
+            f"transcript files, and {'skipped' if skip_ollama else 'generated'} Ollama learning notes."
+        ),
+        created_files=created_files,
+        probe_result=None,
+    )
 
 
 def extract_ocr_subtitles(
@@ -877,22 +1249,40 @@ def process_video(
 
 def main() -> int:
     args = parse_args()
-    video_path = Path(args.video).expanduser().resolve()
     output_dir = Path(args.output_dir).expanduser().resolve()
 
     try:
-        result = process_video(
-            video_path=video_path,
-            output_dir=output_dir,
-            strategy=args.strategy,
-            stream_index=args.stream_index,
-            output_format=args.format,
-            model_name=args.model,
-            language=args.language,
-            probe_only=args.probe_only,
-            ocr_sample_fps=args.ocr_sample_fps,
-            subtitle_region_ratio=args.subtitle_region_ratio,
-        )
+        if args.download_url:
+            video_path = download_video(args.download_url, output_dir).resolve()
+        elif args.video:
+            video_path = Path(args.video).expanduser().resolve()
+        else:
+            raise PipelineError("Provide a local video path or --download-url.")
+
+        if args.start or args.end or not args.skip_ollama:
+            result = process_learning_clip(
+                video_path=video_path,
+                output_dir=output_dir,
+                model_name=args.model,
+                language=args.language,
+                start=args.start,
+                end=args.end,
+                ollama_model=args.ollama_model,
+                skip_ollama=args.skip_ollama,
+            )
+        else:
+            result = process_video(
+                video_path=video_path,
+                output_dir=output_dir,
+                strategy=args.strategy,
+                stream_index=args.stream_index,
+                output_format=args.format,
+                model_name=args.model,
+                language=args.language,
+                probe_only=args.probe_only,
+                ocr_sample_fps=args.ocr_sample_fps,
+                subtitle_region_ratio=args.subtitle_region_ratio,
+            )
         if result.probe_result is not None:
             print(format_probe(result.probe_result))
         print(result.summary)

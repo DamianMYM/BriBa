@@ -1,105 +1,111 @@
-# Subtitle Fusion Workbench
+# BriBa
 
-This project now includes both a CLI pipeline and a simple drag-and-drop Gradio UI.
+**English | [中文](README-CN.md)**
 
-Current capabilities:
+BriBa is a local-first English listening study workbench. It helps learners turn an English video clip into a reusable study library with audio, English subtitles, optional Chinese translations, and editable study notes.
 
-- Probe a video with `ffprobe`
-- Detect embedded subtitle streams
-- Extract a selected subtitle stream with `ffmpeg`
-- Transcribe speech with Whisper-compatible ASR
-- OCR the bottom subtitle band with Apple Vision
-- Fuse ASR and OCR into a reviewable transcript prototype
-- Export ASR, OCR, and fused results as `.srt`, `.txt`, and `.json`
+## Highlights
 
-## Environment check
+- Clip a video by absolute start/end time.
+- Generate English subtitles with Whisper-compatible ASR.
+- Review and correct subtitle lines manually.
+- Generate optional Chinese line-by-line translations with local Ollama.
+- Study with audio, sentence replay, subtitle delay adjustment, and editable notes.
+- Keep all media processing and AI calls on your own machine.
 
-You mentioned the `llava` conda environment. I checked the environment at `/Users/damianma/anaconda/anaconda3/envs/llava` and found:
+## Disclaimer
 
-- `gradio`: installed
-- `tkinter`: installed
-- `ffmpeg`: not installed
-- `ffprobe`: not installed
-- `whisper`: not installed
-- `faster-whisper`: not installed
+BriBa is for personal English learning, listening practice, classroom demonstration, and non-commercial research only.
 
-## Files
-
-- `subtitle_pipeline.py`: CLI and reusable processing logic
-- `app_gradio.py`: local drag-and-drop UI
-- `vision_ocr.swift`: Apple Vision OCR helper used by the v2 prototype
+This project does not provide, host, sell, or distribute any videos, subtitles, TV shows, movies, or copyrighted media. Users are responsible for ensuring they have the legal right to process any media they import.
 
 ## Requirements
 
-- Python 3.11+
-- `ffmpeg`
-- `ffprobe`
-- One ASR backend:
-  - `faster-whisper`
-  - or `openai-whisper`
-- macOS with Apple Vision available through `swift`
+- Python 3.10+
+- FFmpeg, usually provided automatically through `imageio-ffmpeg`
+- Ollama for local AI features
+- A GPU is recommended for Whisper `large-v3`
 
-## CLI usage
+## Install
 
-Auto mode:
+```powershell
+git clone https://github.com/DamianMYM/subtitle-fusion-workbench.git
+cd subtitle-fusion-workbench
 
-```bash
-python3 subtitle_pipeline.py /path/to/video.mp4 --output-dir ./out
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-Probe only:
+## Ollama
 
-```bash
-python3 subtitle_pipeline.py /path/to/video.mp4 --probe-only
+Install Ollama from:
+
+```text
+https://ollama.com/
 ```
 
-Force Whisper ASR:
+Check the local service:
 
-```bash
-PATH=/usr/local/bin:$PATH /Users/damianma/anaconda/anaconda3/envs/llava/bin/python subtitle_pipeline.py /path/to/video.mp4 --strategy asr --model base --language en
+```powershell
+ollama list
 ```
 
-Run the v2 fusion prototype:
+Start it manually if needed:
 
-```bash
-PATH=/usr/local/bin:$PATH /Users/damianma/anaconda/anaconda3/envs/llava/bin/python subtitle_pipeline.py /path/to/video.mp4 --output-dir ./out --strategy fusion --model base --language en --ocr-sample-fps 1.0
+```powershell
+ollama serve
 ```
 
-For your current machine, this exact command shape is the most reliable:
+BriBa uses Ollama's default local API:
 
-```bash
-PATH=/usr/local/bin:$PATH /Users/damianma/anaconda/anaconda3/envs/llava/bin/python /Users/damianma/Documents/LanguageMaterials/subtitle_pipeline.py /Users/damianma/Downloads/SH_S1E1.mp4 --output-dir /Users/damianma/Documents/LanguageMaterials/output --strategy asr --model base --language en
+```text
+http://127.0.0.1:11434
 ```
 
-The pipeline now sets `KMP_DUPLICATE_LIB_OK=TRUE` automatically before loading Whisper backends, which avoids the OpenMP duplicate-runtime crash we hit during setup.
+The default model field is:
 
-## UI usage
-
-Run the local UI:
-
-```bash
-PATH=/usr/local/bin:$PATH /Users/damianma/anaconda/anaconda3/envs/llava/bin/python app_gradio.py
+```text
+qwen3.5:27b
 ```
 
-Then open the local Gradio URL in your browser and drag a video file into the upload area.
+You can replace it with any model shown by `ollama list`.
 
-## Recommended install path for `llava`
+## Run
 
-If you want this to run inside your usual `llava` environment, install the missing dependencies there:
-
-```bash
-/Users/damianma/anaconda/anaconda3/envs/llava/bin/pip install faster-whisper
+```powershell
+python app_gradio.py
 ```
 
-For media tools, install `ffmpeg` and `ffprobe` through your package manager or conda-forge.
+Open:
 
-## Notes
+```text
+http://127.0.0.1:7860/
+```
 
-- `auto` mode prefers embedded subtitle extraction when subtitle streams exist.
-- If no subtitle stream is present, `auto` falls back to ASR.
-- `ocr` now means bottom-region subtitle OCR using Apple Vision.
-- `fusion` writes:
-  - `*.asr.*`
-  - `*.ocr.*`
-  - `*.fused.*`
-  - `*.review.json`
+Pages:
+
+- `/` - study home
+- `/new/` - create material
+- `/review/` - correct subtitles
+- `/library/` - manage local libraries
+
+## Basic Workflow
+
+1. Open `/new/`.
+2. Upload a video or paste a supported download URL.
+3. Enter the start and end time.
+4. Choose a Whisper model.
+5. Create the study library.
+6. Study on `/`.
+7. Optionally generate Chinese translations.
+8. Correct subtitles in `/review/` if needed.
+
+## License
+
+Copyright is retained by the author.
+
+The source code is visible for learning, review, and personal non-commercial use. Modification, redistribution, sublicensing, commercial use, or publishing derivative versions requires prior written permission from the author.
+
+See [LICENSE](LICENSE).

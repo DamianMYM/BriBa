@@ -1,0 +1,17 @@
+<svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="BriBa mascot">
+  <defs>
+    <linearGradient id="body" x1="18" y1="15" x2="78" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#36d6c3"/>
+      <stop offset="0.55" stop-color="#25a6d9"/>
+      <stop offset="1" stop-color="#4f64f4"/>
+    </linearGradient>
+  </defs>
+  <path d="M23 37c0-15 11-25 26-25 16 0 28 11 28 27v20c0 16-11 27-28 27-16 0-27-10-27-26V37z" fill="url(#body)"/>
+  <path d="M19 43c-7 1-12-3-13-9-1-7 4-12 11-11 5 1 9 5 10 10" fill="#36d6c3"/>
+  <path d="M77 43c7 1 12-3 13-9 1-7-4-12-11-11-5 1-9 5-10 10" fill="#4f64f4"/>
+  <path d="M28 50c0-10 8-17 20-17s20 7 20 17-8 17-20 17-20-7-20-17z" fill="#f8fbff"/>
+  <circle cx="39" cy="48" r="5" fill="#102033"/>
+  <circle cx="58" cy="47" r="4" fill="#102033"/>
+  <path d="M41 58c5 4 11 4 16 0" fill="none" stroke="#102033" stroke-width="3" stroke-linecap="round"/>
+  <rect x="31" y="68" width="34" height="11" rx="5.5" fill="#102033" opacity="0.9"/>
+</svg>

@@ -8,6 +8,8 @@ download-ggml-model.sh
 transcribe_temp_whisper.py
 
 output/
+exports/
+data/projects.json
 *.wav
 *.srt
 *.png
@@ -17,3 +19,6 @@ ggml-*.bin
 *.bin
 
 .swift_module_cache/
+.tools/
+
+wechat-miniprogram/project.private.config.json
