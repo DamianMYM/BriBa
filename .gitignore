@@ -21,4 +21,4 @@ ggml-*.bin
 .swift_module_cache/
 .tools/
 
-wechat-miniprogram/project.private.config.json
+wechat-miniprogram/
