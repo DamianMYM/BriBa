@@ -296,21 +296,27 @@ ROOT_HTML = r"""<!doctype html>
     :root {
       color-scheme: light;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-      --ink: #1d1d1f;
-      --muted: #6e6e73;
-      --line: #d2d2d7;
-      --soft-line: #e8e8ed;
-      --surface: rgba(255, 255, 255, 0.82);
+      --ink: #151518;
+      --muted: #666a73;
+      --line: #d5d9e2;
+      --soft-line: #e6e9ef;
+      --surface: rgba(255, 255, 255, 0.78);
       --surface-solid: #ffffff;
-      --page: #f5f5f7;
-      --accent: #0071e3;
-      --accent-soft: #e8f2ff;
-      --green: #0f8a5f;
+      --page: #f6f7fb;
+      --accent: #0a84ff;
+      --accent-soft: #eaf4ff;
+      --green: #16866f;
+      --mint: #2fd3b8;
+      --deep: #111827;
+      --deep-2: #1f2a3a;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--page);
+      background:
+        radial-gradient(circle at 14% 0%, rgba(47, 211, 184, 0.20), transparent 28%),
+        radial-gradient(circle at 92% 12%, rgba(10, 132, 255, 0.16), transparent 30%),
+        linear-gradient(180deg, #fbfcff 0%, #f3f5f9 420px, #eef2f6 100%);
       color: var(--ink);
       -webkit-font-smoothing: antialiased;
     }
@@ -328,13 +334,13 @@ ROOT_HTML = r"""<!doctype html>
       position: sticky;
       top: 0;
       z-index: 10;
-      border-bottom: 1px solid rgba(210, 210, 215, 0.72);
-      background: rgba(251, 251, 253, 0.84);
+      border-bottom: 1px solid rgba(213, 217, 226, 0.76);
+      background: rgba(251, 252, 255, 0.84);
       backdrop-filter: saturate(180%) blur(20px);
     }
     .header-inner {
       max-width: 1240px;
-      height: 58px;
+      height: 72px;
       margin: 0 auto;
       padding: 0 22px;
       display: flex;
@@ -349,17 +355,21 @@ ROOT_HTML = r"""<!doctype html>
       min-width: 0;
     }
     .logo {
-      width: 34px;
-      height: 34px;
-      flex: 0 0 34px;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      border-radius: 14px;
+      background: #eef9ff;
+      display: grid;
+      place-items: center;
     }
     .logo svg {
-      width: 100%;
-      height: 100%;
+      width: 34px;
+      height: 34px;
       display: block;
     }
     .brand-title {
-      font-size: 17px;
+      font-size: 20px;
       font-weight: 700;
       line-height: 1;
       white-space: nowrap;
@@ -378,13 +388,15 @@ ROOT_HTML = r"""<!doctype html>
       justify-content: flex-end;
     }
     .tool-nav a {
-      min-height: 32px;
+      min-height: 36px;
       display: inline-flex;
       align-items: center;
-      border-radius: 8px;
-      padding: 0 10px;
+      border-radius: 999px;
+      padding: 0 14px;
       color: #424245;
       font-size: 13px;
+      background: rgba(255,255,255,0.62);
+      border: 1px solid rgba(213,217,226,0.8);
     }
     .tool-nav a:hover {
       background: #ededf2;
@@ -392,40 +404,66 @@ ROOT_HTML = r"""<!doctype html>
     }
     main {
       width: 100%;
-      max-width: 1240px;
+      max-width: 1360px;
       margin: 0 auto;
-      padding: 28px 22px 34px;
+      padding: 24px 22px 34px;
     }
     .intro {
+      position: relative;
+      overflow: hidden;
       display: grid;
-      grid-template-columns: minmax(260px, 1fr) minmax(340px, 560px);
-      gap: 22px;
+      grid-template-columns: minmax(260px, 0.9fr) minmax(360px, 1fr);
+      gap: 28px;
       align-items: end;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
+      padding: 32px;
+      border: 1px solid rgba(255,255,255,0.74);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(47,211,184,0.34), transparent 28%),
+        linear-gradient(135deg, #111827 0%, #1f2a3a 62%, #26364a 100%);
+      color: #fff;
+      box-shadow: 0 24px 70px rgba(23, 33, 46, 0.18);
+    }
+    .intro::after {
+      content: "BriBa Studio";
+      position: absolute;
+      right: 30px;
+      top: 22px;
+      color: rgba(255,255,255,0.18);
+      font-size: 54px;
+      font-weight: 800;
+      letter-spacing: 0;
+      pointer-events: none;
     }
     .intro h1 {
       margin: 0;
-      font-size: clamp(28px, 4.2vw, 50px);
-      line-height: 1.05;
+      max-width: 560px;
+      font-size: 42px;
+      line-height: 1.12;
       font-weight: 720;
       letter-spacing: 0;
     }
     .intro p {
-      max-width: 620px;
-      margin: 12px 0 0;
-      font-size: 16px;
+      max-width: 560px;
+      margin: 10px 0 0;
+      font-size: 15px;
       line-height: 1.55;
-      color: var(--muted);
+      color: rgba(255,255,255,0.72);
     }
     .library-bar {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 128px;
       gap: 10px;
       padding: 12px;
-      border: 1px solid var(--soft-line);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.06);
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(255,255,255,0.72);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(22px) saturate(160%);
+      box-shadow: 0 18px 44px rgba(0,0,0,0.16);
+      color: var(--ink);
     }
     label {
       display: block;
@@ -436,7 +474,7 @@ ROOT_HTML = r"""<!doctype html>
     select, textarea, input {
       width: 100%;
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--surface-solid);
       outline: none;
     }
@@ -456,7 +494,7 @@ ROOT_HTML = r"""<!doctype html>
     }
     button {
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 10px;
       background: #fff;
       min-height: 40px;
       padding: 0 13px;
@@ -476,41 +514,66 @@ ROOT_HTML = r"""<!doctype html>
     }
     .empty {
       border: 1px dashed #c7c7cc;
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 24px;
       color: var(--muted);
       background: rgba(255,255,255,0.72);
     }
     .study-layout {
       display: grid;
-      grid-template-columns: minmax(320px, 0.92fr) minmax(380px, 1.08fr);
-      gap: 18px;
+      grid-template-columns: minmax(420px, 0.92fr) minmax(520px, 1.08fr);
+      gap: 20px;
       align-items: start;
     }
     .panel {
       border: 1px solid var(--soft-line);
-      border-radius: 8px;
+      border-radius: 22px;
       background: var(--surface-solid);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.055);
+      box-shadow: 0 18px 50px rgba(23, 33, 46, 0.08);
     }
     .player-panel {
       position: sticky;
       top: 78px;
       overflow: hidden;
+      border-color: rgba(31,42,58,0.10);
     }
     .now-card {
       padding: 22px;
-      background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(47,211,184,0.22), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
       border-bottom: 1px solid var(--soft-line);
     }
+    .title-row {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+    }
+    .mascot-badge {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 20% 10%, #ffffff, transparent 34%),
+        #e9fbff;
+      display: grid;
+      place-items: center;
+      border: 1px solid #d7eef8;
+    }
+    .mascot-badge svg {
+      width: 58px;
+      height: 58px;
+      display: block;
+    }
     .eyebrow {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       font-size: 12px;
       color: var(--muted);
     }
     .study-title {
       margin: 0;
-      font-size: 26px;
+      font-size: 28px;
       line-height: 1.18;
       font-weight: 720;
     }
@@ -522,7 +585,7 @@ ROOT_HTML = r"""<!doctype html>
       overflow-wrap: anywhere;
     }
     .audio-wrap {
-      padding: 16px 22px 0;
+      padding: 18px 22px 0;
     }
     audio {
       width: 100%;
@@ -533,7 +596,8 @@ ROOT_HTML = r"""<!doctype html>
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 12px 22px 0;
+      align-items: flex-start;
+      padding: 14px 22px 0;
       color: var(--muted);
       font-size: 12px;
     }
@@ -545,7 +609,7 @@ ROOT_HTML = r"""<!doctype html>
     }
     .chip-button {
       min-height: 32px;
-      border-radius: 8px;
+      border-radius: 999px;
       padding: 0 10px;
       color: #424245;
       background: #f7f7fa;
@@ -553,7 +617,7 @@ ROOT_HTML = r"""<!doctype html>
       font-size: 12px;
     }
     .chip-button.active {
-      background: #1d1d1f;
+      background: var(--deep);
       color: #fff;
       border-color: #1d1d1f;
     }
@@ -564,14 +628,16 @@ ROOT_HTML = r"""<!doctype html>
     }
     .current-line {
       margin: 18px 22px 0;
-      min-height: 112px;
-      border-radius: 8px;
-      background: #fbfbfd;
-      border: 1px solid var(--soft-line);
-      padding: 18px;
+      min-height: 148px;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.92), rgba(241,252,249,0.96)),
+        #f6fffc;
+      border: 1px solid rgba(47,211,184,0.28);
+      padding: 22px;
       display: flex;
       align-items: center;
-      font-size: 22px;
+      font-size: 28px;
       line-height: 1.42;
       font-weight: 650;
     }
@@ -587,24 +653,37 @@ ROOT_HTML = r"""<!doctype html>
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      padding: 14px 22px 22px;
+      padding: 16px 22px 22px;
     }
     .icon-button {
-      height: 44px;
+      height: 50px;
       padding: 0;
-      font-size: 22px;
+      font-size: 16px;
+      font-weight: 700;
       line-height: 1;
     }
     .assistant {
       border-top: 1px solid var(--soft-line);
-      padding: 20px 22px 22px;
+      padding: 0 22px;
+    }
+    .assistant summary {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      list-style: none;
+    }
+    .assistant summary::-webkit-details-marker { display: none; }
+    .assistant-body {
+      padding-bottom: 20px;
     }
     .assistant-head {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       align-items: baseline;
-      margin-bottom: 12px;
+      margin-bottom: 0;
     }
     .assistant h2 {
       margin: 0;
@@ -626,19 +705,51 @@ ROOT_HTML = r"""<!doctype html>
       margin-top: 12px;
       min-height: 72px;
       border: 1px solid var(--soft-line);
-      border-radius: 8px;
+      border-radius: 10px;
       background: #fbfbfd;
       padding: 12px;
       color: #303033;
       line-height: 1.58;
       white-space: pre-wrap;
     }
+    .notes-panel {
+      margin-top: 18px;
+      overflow: hidden;
+    }
+    .notes-head {
+      min-height: 64px;
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--soft-line);
+    }
+    .notes-head h2 {
+      margin: 0;
+      font-size: 17px;
+    }
+    .notes-panel textarea {
+      min-height: 168px;
+      border: 0;
+      border-radius: 0;
+      background: #fbfbfd;
+      resize: vertical;
+    }
+    .notes-panel textarea:focus {
+      box-shadow: inset 0 0 0 2px rgba(10, 132, 255, 0.18);
+    }
+    .notes-status {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
     .transcript-panel {
       overflow: hidden;
     }
     .transcript-head {
-      height: 58px;
-      padding: 0 16px;
+      height: 64px;
+      padding: 0 18px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -664,15 +775,15 @@ ROOT_HTML = r"""<!doctype html>
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
+      border-radius: 10px;
       background: #f2f2f7;
       color: var(--muted);
       font-size: 12px;
     }
     .line-list {
-      max-height: calc(100vh - 178px);
+      max-height: calc(100vh - 188px);
       overflow: auto;
-      padding: 10px;
+      padding: 12px;
       display: grid;
       gap: 8px;
     }
@@ -681,12 +792,12 @@ ROOT_HTML = r"""<!doctype html>
     }
     .line-item {
       width: 100%;
-      min-height: 66px;
+      min-height: 76px;
       text-align: left;
       border: 1px solid transparent;
-      border-radius: 8px;
+      border-radius: 16px;
       background: #fbfbfd;
-      padding: 10px 12px;
+      padding: 13px 14px;
       cursor: pointer;
     }
     .line-item:hover {
@@ -694,8 +805,8 @@ ROOT_HTML = r"""<!doctype html>
       border-color: #c7def8;
     }
     .line-item.active {
-      background: var(--accent-soft);
-      border-color: #89bfff;
+      background: linear-gradient(180deg, #eff8ff 0%, #f6fbff 100%);
+      border-color: rgba(10,132,255,0.38);
     }
     .line-time {
       margin-bottom: 5px;
@@ -724,10 +835,41 @@ ROOT_HTML = r"""<!doctype html>
     .show-translation .translation-text {
       display: block;
     }
+    .studio-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 30px;
+      margin-bottom: 14px;
+      padding: 0 12px;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+    }
+    .workspace-column {
+      display: grid;
+      gap: 18px;
+    }
+    .transcript-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .player-panel::after {
+      content: "";
+      display: block;
+      height: 5px;
+      background: linear-gradient(90deg, var(--mint), var(--accent));
+    }
     @media (max-width: 940px) {
       .intro,
       .study-layout {
         grid-template-columns: 1fr;
+      }
+      .intro::after {
+        display: none;
       }
       .player-panel {
         position: static;
@@ -742,6 +884,11 @@ ROOT_HTML = r"""<!doctype html>
       }
       .intro {
         gap: 14px;
+        padding: 22px;
+        border-radius: 22px;
+      }
+      .intro h1 {
+        font-size: 30px;
       }
       .header-inner {
         height: auto;
@@ -763,7 +910,16 @@ ROOT_HTML = r"""<!doctype html>
       }
       .current-line {
         min-height: 92px;
-        font-size: 19px;
+        font-size: 21px;
+      }
+      .learning-options,
+      .transcript-head,
+      .notes-head {
+        align-items: flex-start;
+        flex-direction: column;
+        height: auto;
+        padding-top: 14px;
+        padding-bottom: 14px;
       }
       .assistant-actions {
         grid-template-columns: 1fr;
@@ -794,8 +950,9 @@ ROOT_HTML = r"""<!doctype html>
     <main>
       <section class="intro" aria-label="开始学习">
         <div>
-          <h1>回到这一句，慢慢听懂。</h1>
-          <p>首页只保留学习体验。处理视频、校对字幕和导出手机包都在独立页面完成。</p>
+          <div class="studio-badge">v2 Studio · 本地学习模式</div>
+          <h1>打开学习库，进入 BriBa 精听台。</h1>
+          <p>听一句、看一句、记一句。视频处理和字幕校对留在工具页，首页只服务学习。</p>
         </div>
         <div class="library-bar">
           <div>
@@ -868,16 +1025,21 @@ ROOT_HTML = r"""<!doctype html>
         <div class="study-layout">
           <section class="panel player-panel">
             <div class="now-card">
-              <div class="eyebrow">正在学习</div>
-              <h2 class="study-title">${escapeHtml(data.project.title || "Untitled")}</h2>
-              <div class="study-meta">${escapeHtml(data.project.source_name || "")}<br>${escapeHtml(data.project.created_at || "")}</div>
+              <div class="title-row">
+                <div class="mascot-badge">__ICON__</div>
+                <div>
+                  <div class="eyebrow">BriBa 已就位</div>
+                  <h2 class="study-title">${escapeHtml(data.project.title || "Untitled")}</h2>
+                  <div class="study-meta">${escapeHtml(data.project.source_name || "")}<br>${escapeHtml(data.project.created_at || "")}</div>
+                </div>
+              </div>
             </div>
             <div class="audio-wrap">
               <audio controls preload="metadata" src="${data.audio_url || ""}"></audio>
             </div>
             <div class="learning-options">
               <div class="option-group">
-                <button class="chip-button active" data-action="toggle-line" title="显示或隐藏当前句字幕">显示单句</button>
+                <button class="chip-button active" data-action="toggle-line" title="显示或隐藏当前句字幕">隐藏单句</button>
                 <button class="chip-button" data-action="toggle-translation" title="显示或隐藏中文翻译">显示中文</button>
                 <button class="chip-button" data-action="generate-translation" title="使用本地 Ollama 生成中文翻译">生成中文翻译</button>
               </div>
@@ -890,36 +1052,51 @@ ROOT_HTML = r"""<!doctype html>
             </div>
             <div class="current-line is-empty">点击右侧任意一句开始精听。</div>
             <div class="study-controls">
-              <button class="icon-button" data-action="prev" title="上一句" aria-label="上一句">‹</button>
-              <button class="icon-button" data-action="replay" title="重听本句" aria-label="重听本句">↺</button>
-              <button class="icon-button" data-action="next" title="下一句" aria-label="下一句">›</button>
+              <button class="icon-button" data-action="prev" title="上一句" aria-label="上一句">上一句</button>
+              <button class="icon-button" data-action="replay" title="重听本句" aria-label="重听本句">重听</button>
+              <button class="icon-button" data-action="next" title="下一句" aria-label="下一句">下一句</button>
             </div>
-            <section class="assistant">
-              <div class="assistant-head">
-                <h2>AI 学习助手</h2>
-                <span>本地 Ollama</span>
+            <details class="assistant">
+              <summary>
+                <div class="assistant-head">
+                  <h2>AI 学习助手</h2>
+                  <span>本地 Ollama</span>
+                </div>
+                <span class="count-pill assistant-toggle-label">展开</span>
+              </summary>
+              <div class="assistant-body">
+                <textarea id="assistant-question" rows="3" placeholder="例如：这一句有哪些地道表达？语法结构怎么理解？"></textarea>
+                <div class="assistant-actions">
+                  <input id="assistant-model" value="qwen3.5:27b" aria-label="Ollama 模型" />
+                  <button class="primary" id="assistant-button">提问</button>
+                </div>
+                <div class="assistant-answer" id="assistant-answer">选择一句或输入问题，让 BriBa 帮你分析。</div>
               </div>
-              <textarea id="assistant-question" rows="3" placeholder="例如：这一句有哪些地道表达？语法结构怎么理解？"></textarea>
-              <div class="assistant-actions">
-                <input id="assistant-model" value="qwen3.5:27b" aria-label="Ollama 模型" />
-                <button class="primary" id="assistant-button">提问</button>
-              </div>
-              <div class="assistant-answer" id="assistant-answer">选择一句或输入问题，让 BriBa 帮你分析。</div>
-            </section>
+            </details>
           </section>
 
-          <section class="panel transcript-panel">
-            <div class="transcript-head">
-              <div class="transcript-title">
-                <h2>字幕精听</h2>
-                <span class="count-pill">${state.items.length} 句</span>
+          <div class="workspace-column">
+            <section class="panel transcript-panel">
+              <div class="transcript-head">
+                <div class="transcript-title">
+                  <h2>字幕精听</h2>
+                  <span class="count-pill">${state.items.length} 句</span>
+                </div>
+                <div class="transcript-tools">
+                  <button class="chip-button" data-action="jump-active">回到当前句</button>
+                  <button class="chip-button" data-action="toggle-transcript">折叠字幕</button>
+                </div>
               </div>
-              <div class="transcript-actions">
-                <button class="chip-button" data-action="toggle-transcript">折叠字幕</button>
+              <div class="line-list"></div>
+            </section>
+            <section class="panel notes-panel">
+              <div class="notes-head">
+                <h2>学习笔记</h2>
+                <span class="notes-status" id="notes-status">本机自动保存</span>
               </div>
-            </div>
-            <div class="line-list"></div>
-          </section>
+              <textarea id="study-notes" placeholder="写下这一集里值得记住的表达、语法点或发音提醒。"></textarea>
+            </section>
+          </div>
         </div>`;
       renderLines();
       const audio = document.querySelector("audio");
@@ -935,10 +1112,13 @@ ROOT_HTML = r"""<!doctype html>
       document.querySelector('[data-action="toggle-translation"]').addEventListener("click", toggleTranslation);
       document.querySelector('[data-action="generate-translation"]').addEventListener("click", generateTranslation);
       document.querySelector('[data-action="toggle-transcript"]').addEventListener("click", toggleTranscript);
+      document.querySelector('[data-action="jump-active"]').addEventListener("click", () => scrollActiveLine(true));
       document.querySelector('[data-action="sync-down"]').addEventListener("click", () => adjustDelay(-0.2));
       document.querySelector('[data-action="sync-up"]').addEventListener("click", () => adjustDelay(0.2));
+      document.querySelector(".assistant")?.addEventListener("toggle", updateAssistantLabel);
       updateLearningOptions();
       $("assistant-button").addEventListener("click", askAssistant);
+      setupNotes();
     }
     function renderLines() {
       const list = document.querySelector(".line-list");
@@ -968,7 +1148,7 @@ ROOT_HTML = r"""<!doctype html>
           <div class="translation-text">${escapeHtml(state.items[index].translation || "")}</div>
         </div>`;
       const node = document.querySelector(`.line-item[data-index="${index}"]`);
-      if (shouldScroll && node) node.scrollIntoView({ block: "nearest" });
+      if (shouldScroll && node) node.scrollIntoView({ block: "center" });
     }
     function jumpTo(index, play) {
       const item = state.items[index];
@@ -998,6 +1178,12 @@ ROOT_HTML = r"""<!doctype html>
       if (transcriptButton) transcriptButton.textContent = state.transcriptCollapsed ? "展开字幕" : "折叠字幕";
       const syncValue = document.querySelector(".sync-value");
       if (syncValue) syncValue.textContent = `${state.subtitleDelay.toFixed(1)}s`;
+      updateAssistantLabel();
+    }
+    function updateAssistantLabel() {
+      const assistant = document.querySelector(".assistant");
+      const label = document.querySelector(".assistant-toggle-label");
+      if (assistant && label) label.textContent = assistant.open ? "收起" : "展开";
     }
     function toggleCurrentLine() {
       state.showCurrentLine = !state.showCurrentLine;
@@ -1046,9 +1232,33 @@ ROOT_HTML = r"""<!doctype html>
       state.transcriptCollapsed = !state.transcriptCollapsed;
       updateLearningOptions();
     }
+    function scrollActiveLine(force) {
+      const index = state.active >= 0 ? state.active : 0;
+      const node = document.querySelector(`.line-item[data-index="${index}"]`);
+      if (force && node) node.scrollIntoView({ block: "center" });
+    }
     function adjustDelay(delta) {
       state.subtitleDelay = Math.max(-1.5, Math.min(2.5, Number((state.subtitleDelay + delta).toFixed(1))));
       updateLearningOptions();
+    }
+    function notesKey() {
+      const id = state.project?.id || $("project-select")?.value || "default";
+      return `briba-notes:${id}`;
+    }
+    function setupNotes() {
+      const notes = $("study-notes");
+      const status = $("notes-status");
+      if (!notes) return;
+      notes.value = localStorage.getItem(notesKey()) || "";
+      let timer = null;
+      notes.addEventListener("input", () => {
+        if (status) status.textContent = "正在保存...";
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          localStorage.setItem(notesKey(), notes.value);
+          if (status) status.textContent = "已保存到本机";
+        }, 260);
+      });
     }
     window.bribaStudy = {
       toggleCurrentLine,
@@ -1093,6 +1303,239 @@ ROOT_HTML = r"""<!doctype html>
 </body>
 </html>
 """
+
+
+BRIBA_TOOL_CSS = """
+:root {
+  --briba-ink: #151518;
+  --briba-muted: #666a73;
+  --briba-line: #d5d9e2;
+  --briba-soft-line: #e6e9ef;
+  --briba-page: #eef2f6;
+  --briba-accent: #0a84ff;
+  --briba-mint: #2fd3b8;
+  --briba-deep: #111827;
+}
+body,
+.gradio-container {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(47, 211, 184, 0.20), transparent 28%),
+    radial-gradient(circle at 92% 12%, rgba(10, 132, 255, 0.16), transparent 30%),
+    linear-gradient(180deg, #fbfcff 0%, #f3f5f9 420px, #eef2f6 100%) !important;
+  color: var(--briba-ink) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+}
+.gradio-container {
+  max-width: 1360px !important;
+  margin: 0 auto !important;
+  padding: 24px 22px 34px !important;
+}
+footer { display: none !important; }
+.briba-tool-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 26px;
+  border: 1px solid rgba(213,217,226,0.88);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(47,211,184,0.20), transparent 30%),
+    radial-gradient(circle at 92% 0%, rgba(10,132,255,0.14), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(247,251,255,0.94) 100%);
+  color: var(--briba-ink);
+  box-shadow: 0 20px 60px rgba(23, 33, 46, 0.10);
+}
+.briba-tool-hero::after {
+  content: "BriBa Studio";
+  position: absolute;
+  right: 26px;
+  top: 16px;
+  color: rgba(17,24,39,0.055);
+  font-size: 46px;
+  font-weight: 800;
+  pointer-events: none;
+}
+.briba-tool-icon {
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 20% 8%, #fff, transparent 34%),
+    #e9fbff;
+  border: 1px solid rgba(10,132,255,0.14);
+}
+.briba-tool-icon svg {
+  width: 60px;
+  height: 60px;
+  display: block;
+}
+.briba-tool-kicker {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid rgba(10,132,255,0.16);
+  border-radius: 999px;
+  background: rgba(10,132,255,0.08);
+  color: #1f5f96;
+  font-size: 13px;
+}
+.briba-tool-hero h1 {
+  margin: 12px 0 8px;
+  color: var(--briba-ink);
+  font-size: 36px;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+.briba-tool-hero p {
+  margin: 0;
+  max-width: 760px;
+  color: var(--briba-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.briba-tool-nav {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.briba-tool-nav a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(213,217,226,0.92);
+  background: rgba(255,255,255,0.72);
+  color: #303642 !important;
+  text-decoration: none !important;
+  font-size: 13px;
+}
+.briba-tool-nav a:hover {
+  background: rgba(10,132,255,0.09);
+  border-color: rgba(10,132,255,0.24);
+}
+.briba-card,
+.block,
+.form,
+.panel {
+  border-radius: 22px !important;
+}
+.briba-card {
+  padding: 20px;
+  border: 1px solid var(--briba-soft-line);
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 18px 50px rgba(23,33,46,0.08);
+}
+.gradio-container .block {
+  border-color: var(--briba-soft-line) !important;
+  box-shadow: none !important;
+}
+.gradio-container label,
+.gradio-container .label-wrap span {
+  color: var(--briba-muted) !important;
+  font-weight: 650 !important;
+}
+.gradio-container input,
+.gradio-container textarea,
+.gradio-container select {
+  border-radius: 14px !important;
+}
+.gradio-container button {
+  border-radius: 999px !important;
+  min-height: 42px !important;
+  font-weight: 700 !important;
+}
+.gradio-container button.primary,
+.gradio-container button[variant="primary"] {
+  background: var(--briba-accent) !important;
+  border-color: var(--briba-accent) !important;
+}
+.briba-status textarea {
+  min-height: 108px !important;
+}
+.briba-wide-table {
+  overflow: hidden;
+  border-radius: 22px;
+}
+@media (max-width: 860px) {
+  .gradio-container {
+    padding: 16px 14px 28px !important;
+  }
+  .briba-tool-hero {
+    grid-template-columns: 58px minmax(0, 1fr);
+    padding: 22px;
+    border-radius: 22px;
+  }
+  .briba-tool-hero::after {
+    display: none;
+  }
+  .briba-tool-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+  }
+  .briba-tool-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+  .briba-tool-nav {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  .briba-tool-hero h1 {
+    font-size: 28px;
+  }
+}
+""".strip()
+
+
+BRIBA_GRADIO_THEME = gr.themes.Soft(
+    primary_hue="blue",
+    secondary_hue="slate",
+    neutral_hue="slate",
+).set(
+    body_background_fill="#eef2f6",
+    block_background_fill="rgba(255,255,255,0.92)",
+    block_border_width="1px",
+    block_radius="22px",
+    button_large_radius="999px",
+    button_small_radius="999px",
+    input_radius="14px",
+)
+
+
+def tool_header(title: str, subtitle: str, kicker: str) -> str:
+    return f"""
+<section class="briba-tool-hero">
+  <div class="briba-tool-icon">{BRIBA_ICON_SVG}</div>
+  <div>
+    <div class="briba-tool-kicker">{kicker}</div>
+    <h1>{title}</h1>
+    <p>{subtitle}</p>
+  </div>
+  <nav class="briba-tool-nav" aria-label="BriBa 工具导航">
+    <a href="/">学习首页</a>
+    <a href="/new/">新建材料</a>
+    <a href="/review/">校对材料</a>
+    <a href="/library/">学习库</a>
+    <a href="/mobile/">手机包</a>
+  </nav>
+</section>
+""".strip()
+
+
+def tool_shell(title: str, subtitle: str, kicker: str) -> str:
+    return f"<style>{BRIBA_TOOL_CSS}</style>\n{tool_header(title, subtitle, kicker)}"
 
 
 class AssistantRequest(BaseModel):
@@ -1707,24 +2150,26 @@ def assistant_answer(project_id: str, question: str, model: str) -> str:
 
 def new_material_ui() -> gr.Blocks:
     with gr.Blocks(title="BriBa - 新建材料") as demo:
-        gr.Markdown("# 新建材料\n生成学习库后，回到 [学习首页](/) 开始学习。")
-        with gr.Row():
-            file_input = gr.File(label="上传本地视频", file_count="single", type="filepath")
-            with gr.Column():
-                title = gr.Textbox(label="学习库名称", placeholder="例如 English Drama Clip 01")
-                download_url = gr.Textbox(label="视频下载链接，可留空")
+        gr.HTML(tool_shell("新建学习材料", "截取一段视频，生成可精听的音频和字幕。完成后回到学习首页继续。", "素材处理"))
+        with gr.Row(equal_height=True):
+            with gr.Column(scale=4, elem_classes=["briba-card"]):
+                file_input = gr.File(label="上传本地视频", file_count="single", type="filepath")
+                download_url = gr.Textbox(label="视频下载链接，可留空", placeholder="支持可直接下载的视频链接")
+            with gr.Column(scale=5, elem_classes=["briba-card"]):
+                title = gr.Textbox(label="学习库名称", placeholder="例如 Sherlock S01 Clip 01")
                 with gr.Row():
                     start_time = gr.Textbox(value="1分15s", label="开始时间")
                     end_time = gr.Textbox(value="10分55s", label="结束时间")
                 with gr.Row():
                     whisper_model = gr.Dropdown(["large-v3", "medium", "small", "base"], value="large-v3", label="转录模型")
                     language = gr.Textbox(value="en", label="语言")
-                with gr.Accordion("学习笔记，可选", open=False):
+                with gr.Accordion("AI 学习笔记，可选", open=False):
                     use_ollama = gr.Checkbox(value=False, label="创建时同时生成学习笔记")
                     ollama_model = gr.Textbox(value="qwen3.5:27b", label="Ollama 模型")
                 create_button = gr.Button("生成学习库", variant="primary")
-        status = gr.Textbox(label="状态", lines=3)
-        files = gr.Files(label="生成文件")
+        with gr.Row(equal_height=True):
+            status = gr.Textbox(label="状态", lines=4, elem_classes=["briba-status"])
+            files = gr.Files(label="生成文件")
         create_button.click(
             fn=create_learning_project,
             inputs=[title, file_input, download_url, start_time, end_time, whisper_model, language, use_ollama, ollama_model],
@@ -1737,19 +2182,21 @@ def review_ui() -> gr.Blocks:
     choices = project_choices()
     initial = choices[0] if choices else None
     with gr.Blocks(title="BriBa - 校对材料") as demo:
-        gr.Markdown("# 校对材料\n保存后，学习首页会自动使用校对后的字幕。")
-        with gr.Row():
-            selector = gr.Dropdown(choices=choices, value=initial, label="选择学习库", interactive=True)
-            refresh = gr.Button("刷新")
-        with gr.Row():
-            manual_button = gr.Button("人工校对", variant="secondary")
-            ai_button = gr.Button("AI 智能校对", variant="primary")
-        with gr.Accordion("AI 智能校对设置", open=False):
-            ai_model = gr.Textbox(value="qwen3.5:27b", label="AI 模型")
-            ai_max_rows = gr.Slider(0, 300, value=80, step=10, label="AI 最多处理行数，0 表示全部")
-            character_hints = gr.Textbox(label="角色提示，可选", placeholder="Character A, Character B, Teacher, Student")
-            ai_context = gr.Textbox(label="场景提示，可选", lines=2, placeholder="British detective drama dialogue. Remove ads and ASR repetition.")
-        status = gr.Textbox(label="状态", lines=4)
+        gr.HTML(tool_shell("校对材料", "先选择学习库，再决定人工校对或 AI 智能校对。保存后学习首页会自动使用校对字幕。", "字幕整理"))
+        with gr.Row(equal_height=True):
+            with gr.Column(scale=5, elem_classes=["briba-card"]):
+                selector = gr.Dropdown(choices=choices, value=initial, label="选择学习库", interactive=True)
+                with gr.Row():
+                    refresh = gr.Button("刷新")
+                    manual_button = gr.Button("人工校对", variant="secondary")
+                    ai_button = gr.Button("AI 智能校对", variant="primary")
+            with gr.Column(scale=5, elem_classes=["briba-card"]):
+                with gr.Accordion("AI 智能校对设置", open=True):
+                    ai_model = gr.Textbox(value="qwen3.5:27b", label="AI 模型")
+                    ai_max_rows = gr.Slider(0, 300, value=80, step=10, label="AI 最多处理行数，0 表示全部")
+                    character_hints = gr.Textbox(label="角色提示，可选", placeholder="Character A, Character B, Teacher, Student")
+                    ai_context = gr.Textbox(label="场景提示，可选", lines=2, placeholder="British detective drama dialogue. Remove ads and ASR repetition.")
+        status = gr.Textbox(label="状态", lines=4, elem_classes=["briba-status"])
         table = gr.Dataframe(
             headers=REVIEW_COLUMNS,
             datatype=["number", "number", "number", "str", "str", "str", "str"],
@@ -1757,9 +2204,11 @@ def review_ui() -> gr.Blocks:
             column_count=(7, "fixed"),
             interactive=True,
             label="校对表格：重点修改 speaker 和 text",
+            elem_classes=["briba-wide-table"],
         )
-        save_button = gr.Button("保存校对结果", variant="primary")
-        files = gr.Files(label="校对输出文件")
+        with gr.Row():
+            save_button = gr.Button("保存校对结果", variant="primary")
+            files = gr.Files(label="校对输出文件")
         refresh.click(fn=refresh_dropdown, outputs=[selector])
         manual_button.click(fn=prepare_manual_review, inputs=[selector], outputs=[table, status])
         ai_button.click(fn=prepare_ai_review, inputs=[selector, ai_model, character_hints, ai_context, ai_max_rows], outputs=[table, status])
@@ -1771,12 +2220,15 @@ def library_ui() -> gr.Blocks:
     choices = project_choices()
     initial = choices[0] if choices else None
     with gr.Blocks(title="BriBa - 学习库") as demo:
-        gr.Markdown("# 学习库管理\n这里只负责查看材料和文件；真正学习请回到 [学习首页](/)。")
-        with gr.Row():
-            selector = gr.Dropdown(choices=choices, value=initial, label="历史学习库", interactive=True)
-            refresh = gr.Button("刷新")
-            open_button = gr.Button("查看信息", variant="secondary")
-        result = gr.Markdown(label="学习库信息")
+        gr.HTML(tool_shell("学习库", "查看已经处理过的材料、音频、字幕和校对输出。真正学习请回到首页。", "资料中心"))
+        with gr.Row(equal_height=True):
+            with gr.Column(scale=4, elem_classes=["briba-card"]):
+                selector = gr.Dropdown(choices=choices, value=initial, label="历史学习库", interactive=True)
+                with gr.Row():
+                    refresh = gr.Button("刷新")
+                    open_button = gr.Button("查看信息", variant="secondary")
+            with gr.Column(scale=6, elem_classes=["briba-card"]):
+                result = gr.Markdown(label="学习库信息")
         files = gr.Files(label="文件")
         refresh.click(fn=refresh_dropdown, outputs=[selector])
         open_button.click(fn=library_summary, inputs=[selector], outputs=[result, files])
@@ -1786,11 +2238,14 @@ def library_ui() -> gr.Blocks:
 
 def mobile_ui() -> gr.Blocks:
     with gr.Blocks(title="BriBa - 手机包") as demo:
-        gr.Markdown("# 手机包\n校对完成后再导出手机包。手机端会使用同一套“选择学习库 -> 开始学习”的逻辑。")
-        pack_title = gr.Textbox(value="BriBa Learning Pack", label="学习包标题")
-        export_button = gr.Button("导出 BriBa Pack", variant="primary")
-        export_status = gr.Textbox(label="导出结果", lines=3)
-        export_file = gr.File(label="下载手机学习包")
+        gr.HTML(tool_shell("手机包", "把校对后的学习库打包，供轻量端导入使用。这个页面只负责导出。", "离线学习包"))
+        with gr.Row(equal_height=True):
+            with gr.Column(scale=4, elem_classes=["briba-card"]):
+                pack_title = gr.Textbox(value="BriBa Learning Pack", label="学习包标题")
+                export_button = gr.Button("导出 BriBa Pack", variant="primary")
+            with gr.Column(scale=6, elem_classes=["briba-card"]):
+                export_status = gr.Textbox(label="导出结果", lines=4, elem_classes=["briba-status"])
+                export_file = gr.File(label="下载手机学习包")
         export_button.click(fn=export_pack, inputs=[pack_title], outputs=[export_status, export_file])
     return demo
 
